@@ -1,11 +1,11 @@
-import Interval from './interval'
+import Range from './range'
 
 export default class Region {
     name: string;
-    interval: Interval;
+    range: Range;
 
-    constructor(name: string, interval: Interval) {
+    constructor(name: string, range: Range) {
         this.name = name;
-        this.interval = interval;
+        this.range = range;
     }
 }

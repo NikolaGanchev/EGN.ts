@@ -1,6 +1,6 @@
 import test from 'ava'
-import Interval from "./interval";
+import Range from "./range";
 
-test("Interval", (t) => {
-    t.is(new Interval(0, 43).contains(42), true);
+test("Range", (t) => {
+    t.is(new Range(0, 43).contains(42), true);
 })

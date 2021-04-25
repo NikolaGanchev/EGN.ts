@@ -1,4 +1,4 @@
-export default class Interval {
+export default class Range {
     firstNumber: number;
     lastNumber: number;
 
