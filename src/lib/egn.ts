@@ -1,24 +1,43 @@
 import { before1900, after1999 } from './ranges';
 import Region from './region';
 import regions from './regions';
+import Gender from './genders';
+import weights from './weights';
+import Range from './range';
 
 export default class EGN {
     egn: string;
     isValid: boolean = false;
     birthday: Date | null;
     region: Region | null;
+    gender: Gender | null;
     controlNumber: number | null;
+    calculatedControlNumber: number | null;
+    egnArray: number[] | null;
 
     constructor(EGN: string) {
         this.egn = EGN;
+
+        if (this.egn.length != 10) {
+            throw ("EGN is not valid; it should be 10 characters long.");
+        }
+
         this.birthday = this.getDateFromEGN();
         this.region = this.getRegion();
+        this.gender = this.getGender();
         this.controlNumber = this.getControlNumber();
+        this.egnArray = this.getEGNAsNumArray();
+        this.calculatedControlNumber = this.calculateControlNumber();
         this.validate();
     }
 
     private validate() {
-        this.isValid = this.birthday != null && this.region != null && this.controlNumber != null;
+        this.isValid = this.birthday != null
+            && this.region != null
+            && this.gender != null
+            && this.controlNumber != null
+            && this.egnArray != null
+            && this.calculatedControlNumber == this.controlNumber;
     }
 
     private getDateFromEGN(): Date | null {
@@ -76,6 +95,17 @@ export default class EGN {
         return region;
     }
 
+    private getGender(): Gender | null {
+        // 9 is the number of the EGN which dictates one's gender
+        let genderNum: number | undefined = parseInt(this.egn[8]);
+
+        if (isNaN(genderNum)) {
+            return null;
+        }
+
+        return (genderNum % 2 === 0) ? Gender.Man : Gender.Woman;
+    }
+
     private getControlNumber(): number | null {
         let controlNumber: number | undefined = parseInt(this.egn.substring(9));
 
@@ -88,7 +118,7 @@ export default class EGN {
 
     private getEGNAsNumArray(): number[] | null {
         let egnArray: number[] = [];
-        var hasUndefinedNumber: boolean = false;
+        let hasUndefinedNumber: boolean = false;
 
         this.egn.split("").forEach((char) => {
             let charAsNum: number | undefined = parseInt(char);
@@ -105,12 +135,148 @@ export default class EGN {
     }
 
     private calculateControlNumber(): number | null {
-        let egnArray: number[] | null = this.getEGNAsNumArray();
+        let egnArrayLocal: number[] = [];
 
-        if (egnArray === null) {
+        // Need to clone array, since straight up assigning messes up the original array
+        this.egnArray?.forEach((num) => {
+            egnArrayLocal.push(num);
+        })
+
+        if (egnArrayLocal === null) {
             return null;
         }
 
-        return 9;
+        let controlSum: number = 0;
+
+        // Remove input control number from array, since it doesn't go into the calculations
+        egnArrayLocal.pop();
+
+        for (let i = 0; i < egnArrayLocal.length; i++) {
+
+            let weight: number | undefined = weights.get((i + 1));
+
+            if (Number.isNaN(weight)) {
+                return null;
+            }
+
+            controlSum += egnArrayLocal[i] * weight!;
+        }
+
+        let controlNumber = controlSum % 11;
+
+        // Checking controlNumber since it cannot be 10 or more
+        if (controlNumber >= 10) {
+            controlNumber = 0;
+        }
+
+        return controlNumber;
+    }
+
+    static generateRandom(date: Date = this.generateRandomDate(), region: Region = this.generateRandomRegion(), gender: Gender = this.generateRandomGender()) {
+        let egn: string = "";
+        let dateNum: number = date.getDate();
+        let monthNum: number = date.getMonth() + 1;
+        let yearNum: number = date.getFullYear();
+
+        egn += this.constructDateString(dateNum, monthNum, yearNum);
+        egn += this.generateRegionAndGenderCode(region, gender);
+
+
+    }
+
+    private static constructDateString(dateNum: number, monthNum: number, yearNum: number): string {
+        let dateString = "";
+
+        dateString += yearNum.toString().substring(2, 4);
+
+        if (yearNum < 1900) {
+            monthNum += 20;
+        }
+
+        if (yearNum > 1999) {
+            monthNum += 40;
+        }
+
+        if (monthNum < 10) {
+            dateString += "0" + monthNum;
+        }
+        else {
+            dateString += monthNum;
+        }
+
+        if (dateNum < 10) {
+            dateString += "0" + dateNum;
+        }
+        else {
+            dateString += dateNum;
+        }
+
+        return dateString;
+    }
+
+    private static generateRegionAndGenderCode(region: Region, gender: Gender): string {
+        let randomNumber: number = 0;
+        switch (gender) {
+            case Gender.Man: randomNumber = this.generateRandomEvenInRange(region.range);
+                break;
+            case Gender.Woman: randomNumber = this.generateRandomOddInRange(region.range);
+                break;
+        }
+
+        if (randomNumber < 10) {
+            return "00" + randomNumber.toString();
+        }
+
+        if (randomNumber < 100) {
+            return "0" + randomNumber.toString();
+        }
+
+        return randomNumber.toString();
+    }
+
+    private static generateRandomEvenInRange(range: Range): number {
+        let randomNum: number = Math.floor(Math.random() * (range.lastNumber - range.firstNumber) + range.firstNumber);
+        if (randomNum % 2 !== 0) {
+            if (range.contains(randomNum - 1)) {
+                return randomNum - 1;
+            }
+            else {
+                return randomNum + 1;
+            }
+        }
+        return randomNum;
+    }
+
+    private static generateRandomOddInRange(range: Range) {
+        let randomNum: number = Math.floor(Math.random() * (range.lastNumber - range.firstNumber) + range.firstNumber);
+        if (randomNum % 2 == 0) {
+            if (range.contains(randomNum - 1)) {
+                return randomNum - 1;
+            }
+            else {
+                return randomNum + 1;
+            }
+        }
+        return randomNum;
+    }
+
+    static generateRandomInDateInterval() {
+
+    }
+
+    private static generateRandomDate(): Date {
+        return new Date(1970, 0, 0);
+    }
+
+    private static generateRandomRegion(): Region {
+        return regions[Math.floor(Math.random() * regions.length)];
+    }
+
+    private static generateRandomGender(): Gender {
+        return Gender.Woman;
+    }
+
+    private static calculateControlNumber(egn: string) {
+
     }
 }
