@@ -17,11 +17,6 @@ export default class EGN {
 
     constructor(EGN: string) {
         this.egn = EGN;
-
-        if (this.egn.length != 10) {
-            throw ("EGN is not valid; it should be 10 characters long.");
-        }
-
         this.birthday = this.getDateFromEGN();
         this.region = this.getRegion();
         this.gender = this.getGender();
@@ -32,7 +27,8 @@ export default class EGN {
     }
 
     private validate() {
-        this.isValid = this.birthday != null
+        this.isValid = this.egn.length === 10
+            && this.birthday != null
             && this.region != null
             && this.gender != null
             && this.controlNumber != null
@@ -62,7 +58,7 @@ export default class EGN {
         }
 
         // You have to subtract one from the month, since the Date() constructor counts them from 0 (ex. -> January is 0, February is 1...)
-        //You also have to add 1 to the day, since it apparently counts them in a very strange way too.
+        // You also have to add 1 to the day, since it apparently counts them in a very strange way too.
         let date: Date = new Date(year, month - 1, day + 1);
         return date;
     }
@@ -72,6 +68,11 @@ export default class EGN {
         let regionString: string = this.egn.substring(6, 9);
 
         // Remove first zero at first position if one exists
+        if (regionString.charAt(0) === '0') {
+            regionString = regionString.substring(1);
+        }
+
+        // There still exists the possibility of the code being 1 digit
         if (regionString.charAt(0) === '0') {
             regionString = regionString.substring(1);
         }
@@ -96,7 +97,7 @@ export default class EGN {
     }
 
     private getGender(): Gender | null {
-        // 9 is the number of the EGN which dictates one's gender
+        // the ninth number is the number of the EGN which dictates one's gender
         let genderNum: number | undefined = parseInt(this.egn[8]);
 
         if (isNaN(genderNum)) {
@@ -172,19 +173,24 @@ export default class EGN {
         return controlNumber;
     }
 
-    static generateRandom(date: Date = this.generateRandomDate(), region: Region = this.generateRandomRegion(), gender: Gender = this.generateRandomGender()) {
+    static generateRandom(date: Date = this.generateRandomDate(), region: Region = this.generateRandomRegion(), gender: Gender = this.generateRandomGender()): EGN {
         let egn: string = "";
+
+        egn += this.constructDateString(date);
+        egn += this.generateRegionAndGenderCode(region, gender);
+        egn += this.calculateControlNumber(egn);
+
+        let egnObject: EGN = new EGN(egn);
+
+        return egnObject;
+    }
+
+    private static constructDateString(date: Date): string {
+
         let dateNum: number = date.getDate();
         let monthNum: number = date.getMonth() + 1;
         let yearNum: number = date.getFullYear();
 
-        egn += this.constructDateString(dateNum, monthNum, yearNum);
-        egn += this.generateRegionAndGenderCode(region, gender);
-
-
-    }
-
-    private static constructDateString(dateNum: number, monthNum: number, yearNum: number): string {
         let dateString = "";
 
         dateString += yearNum.toString().substring(2, 4);
@@ -260,12 +266,12 @@ export default class EGN {
         return randomNum;
     }
 
-    static generateRandomInDateInterval() {
-
+    static generateRandomInDateInterval(startDate: Date = new Date(1800, 0, 1), endDate: Date = new Date(), region: Region = this.generateRandomRegion(), gender: Gender = this.generateRandomGender()) {
+        return this.generateRandom(this.generateRandomDate(startDate, endDate), region, gender);
     }
 
-    private static generateRandomDate(): Date {
-        return new Date(1970, 0, 0);
+    private static generateRandomDate(startDate: Date = new Date(1800, 0, 1), endDate: Date = new Date()): Date {
+        return new Date(startDate.getTime() + Math.random() * (endDate.getTime() - startDate.getTime()));
     }
 
     private static generateRandomRegion(): Region {
@@ -273,10 +279,57 @@ export default class EGN {
     }
 
     private static generateRandomGender(): Gender {
-        return Gender.Woman;
+        let randomNumber = Math.floor(Math.random() * 2) + 1;
+        randomNumber--;
+        let gender: Gender = randomNumber;
+        return gender;
     }
 
-    private static calculateControlNumber(egn: string) {
+    private static getEGNAsNumArray(egn: string): number[] {
+        let egnArray: number[] = [];
+        let hasUndefinedNumber: boolean = false;
 
+        egn.split("").forEach((char) => {
+            let charAsNum: number | undefined = parseInt(char);
+
+            if (isNaN(charAsNum)) {
+                hasUndefinedNumber = true;
+                return;
+            }
+
+            egnArray.push(charAsNum);
+        });
+
+        if (hasUndefinedNumber) {
+            throw "The EGN has an undefined character in it. Do not forget it can only contain numbers.";
+        }
+
+        return egnArray;
+    }
+
+    private static calculateControlNumber(egn: string): String {
+        let egnArrayLocal: number[] = this.getEGNAsNumArray(egn);
+
+        let controlSum: number = 0;
+
+        for (let i = 0; i < egnArrayLocal.length; i++) {
+
+            let weight: number | undefined = weights.get((i + 1));
+
+            if (Number.isNaN(weight)) {
+                throw "NaN number while generating random EGN."
+            }
+
+            controlSum += egnArrayLocal[i] * weight!;
+        }
+
+        let controlNumber = controlSum % 11;
+
+        // Checking controlNumber since it cannot be 10 or more
+        if (controlNumber >= 10) {
+            controlNumber = 0;
+        }
+
+        return controlNumber.toString();
     }
 }

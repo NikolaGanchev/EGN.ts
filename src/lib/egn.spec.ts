@@ -6,6 +6,10 @@ test("isValid", (t) => {
     t.is(new EGN("6101057509").isValid, true);
 });
 
+test("isNotValid", (t) => {
+    t.is(new EGN("6101057508").isValid, false);
+});
+
 test("Date", (t) => {
     t.deepEqual(new EGN("6101057509").birthday, new Date(61, 0, 6));
 });
@@ -20,6 +24,10 @@ test("Date after 1999", (t) => {
 
 test("Region", (t) => {
     t.is(new EGN("6101057509").region?.name, "София – окръг");
+});
+
+test("Region with 000", (t) => {
+    t.is(new EGN("0208020000").isValid, true);
 });
 
 test("Gender Man", (t) => {
@@ -41,3 +49,9 @@ test("Calculated control number", (t) => {
 test("EGN as array", (t) => {
     t.deepEqual(new EGN("6101057509").egnArray, [6, 1, 0, 1, 0, 5, 7, 5, 0, 9]);
 });
+
+test("Random EGN", (t) => {
+    let egn: EGN = EGN.generateRandom();
+    t.log(egn);
+    t.is(egn.isValid, true);
+})

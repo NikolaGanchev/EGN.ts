@@ -2,7 +2,8 @@ import Region from './region';
 import Range from './range';
 
 let regions: Region[] = [
-    new Region("Благоевград", new Range(0, 43)),
+    // Because of how Regions and Ranges work, it has to start from -1 rather than from 0
+    new Region("Благоевград", new Range(-1, 43)),
     new Region("Бургас", new Range(44, 93)),
     new Region("Варна", new Range(94, 139)),
     new Region("Велико Търново", new Range(140, 169)),
