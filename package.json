@@ -1,5 +1,5 @@
 {
-  "name": "egn",
+  "name": "egn.ts",
   "version": "1.0.0",
   "description": "A TypeScript library for the Bulgarian Identification Number (ЕГН).",
   "main": "build/main/index.js",
