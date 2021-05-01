@@ -35,4 +35,37 @@ let regions: Region[] = [
 
 ]
 
+export let regionsObject = {
+    // Because of how Regions and Ranges work, it has to start from -1 rather than from 0
+    Blagoevgrad: new Region("Благоевград", new Range(-1, 43)),
+    Burgas: new Region("Бургас", new Range(44, 93)),
+    Varna: new Region("Варна", new Range(94, 139)),
+    Veliko_tarnovo: new Region("Велико Търново", new Range(140, 169)),
+    Vidin: new Region("Видин", new Range(170, 183)),
+    Vratsa: new Region("Враца", new Range(184, 217)),
+    Gabrovo: new Region("Габрово", new Range(218, 233)),
+    Kardzhali: new Region("Кърджали", new Range(234, 281)),
+    Kyustendil: new Region("Кюстендил", new Range(282, 301)),
+    Lovech: new Region("Ловеч", new Range(302, 319)),
+    Montana: new Region("Монтана", new Range(320, 341)),
+    Pazardzhik: new Region("Пазарджик", new Range(342, 377)),
+    Pernik: new Region("Перник", new Range(378, 395)),
+    Pleven: new Region("Плевен", new Range(396, 435)),
+    Plovdiv: new Region("Пловдив", new Range(436, 501)),
+    Razgrad: new Region("Разград", new Range(502, 527)),
+    Ruse: new Region("Русе", new Range(528, 555)),
+    Silistra: new Region("Силистра", new Range(556, 575)),
+    Sliven: new Region("Сливен", new Range(576, 601)),
+    Smolyan: new Region("Смолян", new Range(602, 623)),
+    Sofia_grad: new Region("София – град", new Range(624, 721)),
+    Sofia_okrug: new Region("София – окръг", new Range(722, 751)),
+    Stara_Zagora: new Region("Стара Загора", new Range(752, 789)),
+    Dobrich: new Region("Добрич (Толбухин)", new Range(790, 821)),
+    Targovishte: new Region("Търговище", new Range(822, 843)),
+    Haskovo: new Region("Хасково", new Range(844, 871)),
+    Shumen: new Region("Шумен", new Range(872, 903)),
+    Yambol: new Region("Ямбол", new Range(904, 925)),
+    Other: new Region("Друг/Неизвестен", new Range(926, 999)),
+}
+
 export default regions;

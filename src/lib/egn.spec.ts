@@ -1,6 +1,8 @@
 import test from 'ava'
 import EGN from './egn'
 import Gender from './genders';
+import { regionsObject } from './regions';
+import Region from "./region";
 
 test("isValid", (t) => {
     t.is(new EGN("6101057509").isValid, true);
@@ -54,4 +56,23 @@ test("Random EGN", (t) => {
     let egn: EGN = EGN.generateRandom();
     t.log(egn);
     t.is(egn.isValid, true);
+});
+
+test("Random EGN in Date range", (t) => {
+    let startDate: Date = new Date(2005, 9, 25);
+    let endDate: Date = new Date(2005, 9, 29);
+    let egn: EGN = EGN.generateRandomInDateInterval(startDate, endDate);
+    t.is((egn.isValid) ? egn.birthday! >= startDate && egn.birthday! <= endDate : false, true)
+})
+
+test("Random EGN with region", (t) => {
+    let region: Region = regionsObject.Stara_Zagora;
+    let egn: EGN = EGN.generateRandom(undefined, region, undefined);
+    t.log(egn);
+    t.deepEqual(egn.region, regionsObject.Stara_Zagora);
+})
+
+test("Random EGN with gender", (t) => {
+    let egn: EGN = EGN.generateRandom(undefined, undefined, Gender.Man);
+    t.is(egn.gender, Gender.Man);
 })

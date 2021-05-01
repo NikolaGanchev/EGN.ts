@@ -222,11 +222,11 @@ export default class EGN {
 
     private static generateRegionAndGenderCode(region: Region, gender: Gender): string {
         let randomNumber: number = 0;
-        switch (gender) {
-            case Gender.Man: randomNumber = this.generateRandomEvenInRange(region.range);
-                break;
-            case Gender.Woman: randomNumber = this.generateRandomOddInRange(region.range);
-                break;
+        if (gender == Gender.Man) {
+            randomNumber = this.generateRandomEvenInRange(region.range);
+        }
+        else {
+            randomNumber = this.generateRandomOddInRange(region.range);
         }
 
         if (randomNumber < 10) {
@@ -242,7 +242,7 @@ export default class EGN {
 
     private static generateRandomEvenInRange(range: Range): number {
         let randomNum: number = Math.floor(Math.random() * (range.lastNumber - range.firstNumber) + range.firstNumber);
-        if (randomNum % 2 !== 0) {
+        if (randomNum % 2 != 0) {
             if (range.contains(randomNum - 1)) {
                 return randomNum - 1;
             }
@@ -275,7 +275,8 @@ export default class EGN {
     }
 
     private static generateRandomRegion(): Region {
-        return regions[Math.floor(Math.random() * regions.length)];
+        let randomNumber: number = Math.floor(Math.random() * (regions.length - 1));
+        return regions[randomNumber == -1 ? 0 : randomNumber];
     }
 
     private static generateRandomGender(): Gender {

@@ -1,3 +1,3 @@
-# egn-validator
+# EGN
 
-A TypeScript validator for the Bulgarian Identification Number (ЕГН).
+A TypeScript library for working with the Bulgarian Identification Number (ЕГН).
